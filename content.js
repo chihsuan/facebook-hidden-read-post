@@ -117,7 +117,7 @@
   }
 
   function savePost(key) {
-    if (key) {
+    if (key && !newStorageData.hasOwnProperty(key)) {
       // save with datetime
       newStorageData[key] = +new Date();
       saveToLocalStorage('data', newStorageData);
