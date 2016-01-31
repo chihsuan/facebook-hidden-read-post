@@ -18,7 +18,7 @@
     updatePostStorage();
 
     for (var hashKey in prevStorageData) {
-      // not expire
+      // expire
       if (diffDays(new Date(prevStorageData[hashKey]), lastUpdate) > 1) {
         delete prevStorageData[hashKey];
       }
