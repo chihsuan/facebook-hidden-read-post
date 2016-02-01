@@ -18,18 +18,16 @@
     prevStorageData = $.extend({}, data);
     newStorageData = data;
     updatePostWall(true);
-    updatePostStorage();
     for (var hashKey in prevStorageData) {
       // expire
       if (diffDays(new Date(prevStorageData[hashKey]), lastUpdate) > 1) {
         delete prevStorageData[hashKey];
       }
     }
+    updatePostStorage();
   }
 
   $.fn.scrollStopped = function(callback) {
-    if (window.location.pathname !== '/')
-      return;
     var that = this, $this = $(that);
     $this.scroll(function(ev) {
       clearTimeout($this.data('scrollTimeout'));
@@ -38,13 +36,14 @@
   };
   
   $(window).scrollStopped(function() {
-    if (window.location.pathname !== '/')
-      return;
     updatePostWall(true);
     updatePostStorage();
   });
 
   function updatePostWall(forceUpdate) {
+    if (window.location.pathname !== '/')
+      return;
+
     forceUpdate = forceUpdate ? forceUpdate : false
     // update when exceed one second
     if (!forceUpdate && diffSeconds(new Date(), lastUpdate) < 1) {
@@ -73,9 +72,6 @@
       }
     });
 
-    // make sure there is one post on wall
-    //if (posts.length === 0)
-      //updatePostWall(true, true);
   }
 
   function isRead(key) {
@@ -96,26 +92,28 @@
       top += el.offsetTop;
       left += el.offsetLeft;
     }
-
     return (
-      top > (window.pageYOffset + window.innerHeight)
+      top !== 0 && top > (window.pageYOffset + window.innerHeight)
     ); 
   }
 
   function updatePostStorage() {
+    if (window.location.pathname !== '/')
+      return;
+
     var posts = $('._5jmm');
     var index = 0;
 
     posts.each(function() {
-      if (bottomOfView(this)) {
+      if (bottomOfView(this) || this.style.disply === 'none') {
         return;
       }
 
       // use post link as identify 
-      var postHref = $(this).find('._5pcq').attr('href');
-      savePost(postHref)
-      
+      var postHref = $(this).find('a._5pcq').attr('href');
       var headerText = $(this).find('.fcg').eq(0).text();
+
+      savePost(postHref)
       if (!postHref && headerText) {
         savePost(headerText)
       }
