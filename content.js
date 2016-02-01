@@ -1,5 +1,8 @@
 (function(window, chrome) {
 
+  if (window.location.pathname !== '/')
+    return;
+
   var storagePrfix = 'fb-refine';
   var prevStorageData = {};
   var newStorageData = {};
@@ -16,7 +19,6 @@
     newStorageData = data;
     updatePostWall(true);
     updatePostStorage();
-
     for (var hashKey in prevStorageData) {
       // expire
       if (diffDays(new Date(prevStorageData[hashKey]), lastUpdate) > 1) {
@@ -26,6 +28,8 @@
   }
 
   $.fn.scrollStopped = function(callback) {
+    if (window.location.pathname !== '/')
+      return;
     var that = this, $this = $(that);
     $this.scroll(function(ev) {
       clearTimeout($this.data('scrollTimeout'));
@@ -34,6 +38,8 @@
   };
   
   $(window).scrollStopped(function() {
+    if (window.location.pathname !== '/')
+      return;
     updatePostWall(true);
     updatePostStorage();
   });
@@ -55,7 +61,7 @@
         return; 
 
       // use post link as identify 
-      var postHref = $(this).find('._5pcq').attr('href');
+      var postHref = $(this).find('a._5pcq').attr('href');
 
       if(isRead(postHref)) {
         $(this).hide();
