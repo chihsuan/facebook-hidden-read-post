@@ -1,7 +1,5 @@
 (function(window, chrome) {
 
-  if (window.location.pathname !== '/')
-    return;
 
   var storagePrfix = 'fb-refine';
   var prevStorageData = {};
@@ -9,12 +7,15 @@
   var lastUpdate = new Date();
   var postNumber = 0;
 
-  window.onscroll = updatePostWall;
+  if (!isFacebookRoot())
+    return;
+
+  window.onscroll = checkAndUpdatePosts;
   getLocalStorage('data', init);
 
   function init(data) {
     if (!data)
-      data = {}
+      data = {};
     prevStorageData = $.extend({}, data);
     newStorageData = data;
     updatePostWall(true);
@@ -40,13 +41,13 @@
     updatePostStorage();
   });
 
-  function updatePostWall(forceUpdate) {
-    if (window.location.pathname !== '/')
+  function checkAndUpdatePosts(forceUpdate) {
+    if (!isFacebookRoot())
       return;
 
-    forceUpdate = forceUpdate ? forceUpdate : false
+    forceUpdate = forceUpdate ? forceUpdate : false;
     // update when exceed one second
-    if (!forceUpdate && diffSeconds(new Date(), lastUpdate) < 1) {
+    if (!forceUpdate && diffSeconds(new Date(), lastUpdate) < 0.5) {
       lastUpdate = new Date();
       return;
     }
@@ -63,12 +64,12 @@
       var postHref = $(this).find('a._5pcq').attr('href');
 
       if(isRead(postHref)) {
-        $(this).hide();
+        this.style.disply = 'none';
       }
 
       var headerText = $(this).find('.fcg').eq(0).text();
-      if (!postHref && headerText && isRead(headerText)) {
-        $(this).hide();
+      if ((!postHref || postHref === '#') && headerText && isRead(headerText)) {
+        this.style.disply = 'none';
       }
     });
 
@@ -98,7 +99,7 @@
   }
 
   function updatePostStorage() {
-    if (window.location.pathname !== '/')
+    if (!isFacebookRoot())
       return;
 
     var posts = $('._5jmm');
@@ -113,15 +114,17 @@
       var postHref = $(this).find('a._5pcq').attr('href');
       var headerText = $(this).find('.fcg').eq(0).text();
 
-      savePost(postHref)
-      if (!postHref && headerText) {
-        savePost(headerText)
+      savePost(postHref);
+
+      // Sponsored or firends like, comment message...
+      if ((!postHref || postHref === '#') && headerText) {
+        savePost(headerText);
       }
     });
   }
 
   function savePost(key) {
-    if (key && !newStorageData.hasOwnProperty(key)) {
+    if (key && key !== '#' && !newStorageData.hasOwnProperty(key)) {
       // save with datetime
       newStorageData[key] = +new Date();
       saveToLocalStorage('data', newStorageData);
@@ -157,6 +160,10 @@
     var timeDiff = Math.abs(current.getTime() - from.getTime());
     var diff = (timeDiff / (1000));
     return diff;
+  }
+
+  function isFacebookRoot() {
+    return window.location.pathname === '/';
   }
 
 })(window, chrome);
