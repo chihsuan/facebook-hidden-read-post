@@ -16,9 +16,11 @@
   function init(data) {
     if (!data)
       data = {};
+
     prevStorageData = $.extend({}, data);
     newStorageData = data;
-    updatePostWall(true);
+    checkAndUpdatePosts(true);
+
     for (var hashKey in prevStorageData) {
       // expire
       if (diffDays(new Date(prevStorageData[hashKey]), lastUpdate) > 1) {
@@ -37,7 +39,7 @@
   };
   
   $(window).scrollStopped(function() {
-    updatePostWall(true);
+    checkAndUpdatePosts(true);
     updatePostStorage();
   });
 
@@ -57,19 +59,19 @@
 
     posts.each(function() {
       // if have hidden
-      if(this.style.disply === 'none')
+      if(this.style.display === 'none')
         return; 
 
       // use post link as identify 
       var postHref = $(this).find('a._5pcq').attr('href');
 
       if(isRead(postHref)) {
-        this.style.disply = 'none';
+        this.style.display = 'none';
       }
 
       var headerText = $(this).find('.fcg').eq(0).text();
       if ((!postHref || postHref === '#') && headerText && isRead(headerText)) {
-        this.style.disply = 'none';
+        this.style.display = 'none';
       }
     });
 
